@@ -22,11 +22,13 @@ https://github.com/user-attachments/assets/d0eb7440-a6e2-4276-865c-a1055181bb33
 
 ## Overview
 
-II Agent is built around providing an agentic interface to Anthropic Claude models. It offers:
+II Agent is built around providing an agentic interface to leading language models. It offers:
 
 - A CLI interface for direct command-line interaction
 - A WebSocket server that powers a modern React-based frontend
-- Integration with Google Cloud's Vertex AI for API access to Anthropic models
+- Integration with multiple LLM providers:
+  - Anthropic Claude models (direct API or via Google Cloud Vertex AI)
+  - Google Gemini models (direct API or via Google Cloud Vertex AI)
 
 ## Core Capabilities
 
@@ -92,46 +94,87 @@ Despite these challenges, II-Agent demonstrated strong performance on the benchm
 You can view the full traces of some samples here: [GAIA Benchmark Traces](https://ii-agent-gaia.ii.inc/)
 
 ## Requirements
-
+- Docker Compose
 - Python 3.10+
 - Node.js 18+ (for frontend)
-- Google Cloud project with Vertex AI API enabled or Anthropic API key
+- At least one of the following:
+  - Anthropic API key, or
+  - Google Gemini API key, or  
+  - Google Cloud project with Vertex AI API enabled
 
 ## Environment
 
-### Environment Variables
-
-Create a `.env` file in the root directory with the following variables:
-
-```bash
-# Image and Video Generation Tool
-OPENAI_API_KEY=your_openai_key
-OPENAI_AZURE_ENDPOINT=your_azure_endpoint
-# Search Provider
-TAVILY_API_KEY=your_tavily_key
-#JINA_API_KEY=your_jina_key
-#FIRECRAWL_API_KEY=your_firecrawl_key
-# For Image Search and better search results use SerpAPI
-#SERPAPI_API_KEY=your_serpapi_key 
-
-STATIC_FILE_BASE_URL=http://localhost:8000/
-
-#If you are using Anthropic client
-ANTHROPIC_API_KEY=
-#If you are using Goolge Vertex (recommended if you have permission extra throughput)
-#GOOGLE_APPLICATION_CREDENTIALS=
-```
+You need to set up 2 `.env` files to run both frontend and backend
 
 ### Frontend Environment Variables
 
-For the frontend, create a `.env` file in the frontend directory:
+For the frontend, create a `.env` file in the frontend directory, point to the port of your backend:
 
 ```bash
 NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
 
+### Backend Environment Variables
+
+For the back end, create a `.env` file in the root directory with the following variables. Here are the required variables needed to run this project:
+
+```bash
+# Required API Keys - Choose one based on your LLM provider:
+# Option 1: For Claude models via Anthropic
+ANTHROPIC_API_KEY=your_anthropic_key
+
+# Option 2: For Gemini models via Google
+GEMINI_API_KEY=your_gemini_key
+# Search Provider API Key
+TAVILY_API_KEY=your_tavily_key
+
+STATIC_FILE_BASE_URL=http://localhost:8000/
+```
+
+We also support other search and crawl provider such as FireCrawl and SerpAPI (Optional but yield better performance):
+```bash
+JINA_API_KEY=your_jina_key
+FIRECRAWL_API_KEY=your_firecrawl_key
+SERPAPI_API_KEY=your_serpapi_key 
+```
+
+Enabling Image and Video Generation Tool (Optional, good for more creative output)
+```bash
+OPENAI_API_KEY=your_openai_key
+OPENAI_AZURE_ENDPOINT=your_azure_endpoint
+```
+
+Image Search Tool  (Optional, good for more beautiful output)
+```
+SERPAPI_API_KEY=your_serpapi_key 
+```
+
+
 ## Installation
 
+### Docker Installation (Recommended)
+
+1. Clone the repository
+2. Set up the 2 environment files as mentioned in the above step
+3. If you are using Anthropic Client run
+```
+chmod +x start.sh stop.sh
+./start.sh 
+```
+If you are using Vertex, run with these variables
+```
+GOOGLE_APPLICATION_CREDENTIALS=absolute-path-to-credential \
+PROJECT_ID=project-id \
+REGION=region \
+./start.sh
+```
+*Note: Due to a bug in the latest docker, if you receive and error, try running with `--force-recreate`. For example `./start.sh --force-recreate `*
+
+After running start.sh, you can check your application at: localhost:3000
+
+Run `./stop.sh` to tear down the service.
+
+### Manual Installation
 1. Clone the repository
 2. Set up Python environment:
    ```bash
@@ -146,8 +189,6 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
    npm install
    ```
 
-## Usage
-
 ### Command Line Interface
 
 If you want to use anthropic client, set `ANTHROPIC_API_KEY` in `.env` file and run:
@@ -155,8 +196,9 @@ If you want to use anthropic client, set `ANTHROPIC_API_KEY` in `.env` file and 
 python cli.py 
 ```
 
-If you want to use vertex, set `GOOGLE_APPLICATION_CREDENTIALS` in `.env` file and run:
+If you want to use vertex, set `GOOGLE_APPLICATION_CREDENTIALS` and run:
 ```bash
+GOOGLE_APPLICATION_CREDENTIALS=path-to-your-credential
 python cli.py --project-id YOUR_PROJECT_ID --region YOUR_REGION
 ```
 
@@ -173,13 +215,12 @@ Options:
 
 When using Anthropic client:
 ```bash
-export STATIC_FILE_BASE_URL=http://localhost:8000
 python ws_server.py --port 8000
 ```
 
 When using Vertex:
 ```bash
-export STATIC_FILE_BASE_URL=http://localhost:8000
+GOOGLE_APPLICATION_CREDENTIALS=path-to-your-credential \
 python ws_server.py --port 8000 --project-id YOUR_PROJECT_ID --region YOUR_REGION
 ```
 
@@ -204,7 +245,7 @@ npm run dev
 
 ## Conclusion
 
-The II-Agent framework, architected around the reasoning capabilities of large language models like Claude 3.7 Sonnet, presents a comprehensive and robust methodology for building versatile AI agents. Through its synergistic combination of a powerful LLM, a rich set of execution capabilities, an explicit mechanism for planning and reflection, and intelligent context management strategies, II-Agent is well-equipped to address a wide spectrum of complex, multi-step tasks. Its open-source nature and extensible design provide a strong foundation for continued research and development in the rapidly evolving field of agentic AI.
+The II-Agent framework, architected around the reasoning capabilities of large language models like Claude 4.0 Sonnet or Gemini 2.5 Pro, presents a comprehensive and robust methodology for building versatile AI agents. Through its synergistic combination of a powerful LLM, a rich set of execution capabilities, an explicit mechanism for planning and reflection, and intelligent context management strategies, II-Agent is well-equipped to address a wide spectrum of complex, multi-step tasks. Its open-source nature and extensible design provide a strong foundation for continued research and development in the rapidly evolving field of agentic AI.
 
 ## Acknowledgement
 
